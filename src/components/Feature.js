@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 
 // Don't touch this import
 import { fetchQueryResultsFromTermAndValue } from '../api';
@@ -29,9 +29,31 @@ import { fetchQueryResultsFromTermAndValue } from '../api';
  * finally:
  *  - call setIsLoading, set it to false
  */
-const Searchable = (props) => {
-  
-}
+const Searchable = ({ searchTerm, searchValue, setIsLoading, setSearchResults }) => {
+  const handleClick = async (event) => {
+    event.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const results = await fetchQueryResultsFromTermAndValue(searchTerm, searchValue);
+      setSearchResults(results);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 1000);
+    }
+  };
+
+  return (
+    <span className="content">
+      <a href="#" onClick={handleClick}>
+        {searchValue}
+      </a>
+    </span>
+  );
+};
 
 /**
  * We need a new component called Feature which looks like this when no featuredResult is passed in as a prop:
@@ -67,8 +89,162 @@ const Searchable = (props) => {
  * 
  * This component should be exported as default.
  */
-const Feature = (props) => {
 
-}
+const Feature = ({ featuredResult, setIsLoading, setSearchResults }) => {
+    if (!featuredResult) {
+      return <main id="feature"></main>;
+    }
+  
+    const {
+      title,
+      dated,
+      images,
+      primaryimageurl,
+      description,
+      culture,
+      style,
+      technique,
+      medium,
+      dimensions,
+      people,
+      department,
+      division,
+      contact,
+      creditline,
+    } = featuredResult;
+  
+    return (
+      <main id="feature">
+        <div className="object-feature">
+          <header>
+            {title && <h3>{title}</h3>}
+            {dated && <h4>{dated}</h4>}
+          </header>
+          <section className="facts">
+            {title && (
+              <>
+                <span className="title">Title:</span>
+                <span className="content">{title}</span>
+              </>
+            )}
+            {dated && (
+              <>
+                <span className="title">Dated:</span>
+                <span className="content">{dated}</span>
+              </>
+            )}
+            {primaryimageurl && (
+              <>
+                <span className="title"></span>
+                <span className="content">
+                  <img src={primaryimageurl} />
+                </span>
+              </>
+            )}
+            {description && (
+              <>
+                <span className="title">Description:</span>
+                <span className="content">{description}</span>
+              </>
+            )}
+            {Array.isArray(culture) && culture.length > 0 && (
+              <>
+                <span className="title">Culture:</span>
+                <span className="content">
+                  {culture.map((item, index) => (
+                    <Searchable
+                      key={index}
+                      searchTerm="culture"
+                      searchValue={item}
+                      setIsLoading={setIsLoading}
+                      setSearchResults={setSearchResults}
+                    />
+                  ))}
+                </span>
+              </>
+            )}
+            {style && (
+              <>
+                <span className="title">Style:</span>
+                <span className="content">{style}</span>
+              </>
+            )}
+            {technique && (
+              <>
+                <span className="title">Technique:</span>
+                <span className="content">
+                  <Searchable
+                    searchTerm="technique"
+                    searchValue={technique.toLowerCase()}
+                    setIsLoading={setIsLoading}
+                    setSearchResults={setSearchResults}
+                  />
+                </span>
+              </>
+            )}
+            {medium && (
+              <>
+                <span className="title">Medium:</span>
+                <span className="content">
+                  <Searchable
+                    searchTerm="medium"
+                    searchValue={medium}
+                    setIsLoading={setIsLoading}
+                    setSearchResults={setSearchResults}
+                  />
+                </span>
+              </>
+            )}
+                      {dimensions && (
+            <>
+              <span className="title">Dimensions:</span>
+              <span className="content">{dimensions}</span>
+            </>
+          )}
+        {people && people.length > 0 && (
+        <>
+            <span className="title">People:</span>
+            <span className="content">
+            {people.map((person, index) => (
+                <Searchable
+                key={index}
+                searchTerm="people"
+                searchValue={person.name} 
+                setIsLoading={setIsLoading}
+                setSearchResults={setSearchResults}
+                />
+            ))}
+            </span>
+        </>
+        )}
+          {department && (
+            <>
+              <span className="title">Department:</span>
+              <span className="content">{department}</span>
+            </>
+          )}
+          {division && (
+            <>
+              <span className="title">Division:</span>
+              <span className="content">{division}</span>
+            </>
+          )}
+          {contact && (
+            <>
+              <span className="title">Contact:</span>
+              <span className="content">{contact}</span>
+            </>
+          )}
+          {creditline && (
+            <>
+              <span className="title">Credit Line:</span>
+              <span className="content">{creditline}</span>
+            </>
+          )}
+          </section>
+        </div>
+      </main>
+    );
+  };
 
 export default Feature;
